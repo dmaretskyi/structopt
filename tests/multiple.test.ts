@@ -23,7 +23,8 @@ test('MultipleArgs - empty', (t) => {
   const res = fromArray(MultipleArgs, ['mode'])
   t.deepEqual(res, {
     mode: 'mode',
-    files: []
+    files: [],
+    '_': [],
   })
 })
 
@@ -32,7 +33,8 @@ test('MultipleArgs - one', (t) => {
   const res = fromArray(MultipleArgs, ['mode', 'foo'])
   t.deepEqual(res, {
     mode: 'mode',
-    files: ['foo']
+    files: ['foo'],
+    '_': [],
   })
 })
 
@@ -40,7 +42,8 @@ test('MultipleArgs - two', (t) => {
   const res = fromArray(MultipleArgs, ['mode', 'foo', 'bar'])
   t.deepEqual(res, {
     mode: 'mode',
-    files: ['foo', 'bar']
+    files: ['foo', 'bar'],
+    '_': [],
   })
 })
 
@@ -49,7 +52,7 @@ test('MultipleArgs - required fails when positional argument is not provided', (
   t.throws(() => {
     structOpt.validate({
       mode: 'mode',
-      files: []
+      files: [],
     } as never)
   })
 })

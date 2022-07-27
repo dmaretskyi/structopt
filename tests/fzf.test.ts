@@ -11,5 +11,6 @@ test('GrepArgs - short', (t) => {
   const res = fromArray(FzfArgs, [])
   t.deepEqual(res, {
     algo: 'v2',
+    '_': [],
   })
 })

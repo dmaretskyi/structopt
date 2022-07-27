@@ -7,13 +7,21 @@ export class StructOptImpl<T> {
   about: string
   version: string
   options: IOption[] = []
+  allowTrailing: boolean
   type!: T
 
-  constructor({ key, name, about, version }: IStructOpt) {
+  constructor({ key, name, about, version, allowTrailing }: IStructOpt) {
     this.key = key
     this.name = name || key
     this.about = about || ''
     this.version = version || ''
+    this.allowTrailing = allowTrailing ?? false
+  }
+
+  allPositionalsFilled(parsed: Record<string, any>) {
+    return this.options.every(
+      (o) => !o.short && !o.long && (o.repeated && !o.required || !Object.keys(parsed).includes(o.key)),
+    )
   }
 
   addOption(option: IOption) {
@@ -47,6 +55,12 @@ export class StructOptImpl<T> {
         }
       })
       if (!option) {
+        if(this.allowTrailing && this.allPositionalsFilled(parsed)) {
+          return this.parse(xs, {
+            ...parsed,
+            '_': arrayAppend(parsed['_'], x),
+          })
+        }
         throw new UnexpectedArgsError(
           `Found argument '${x}' which wasn't expected, or isn't valid in this context`,
         )
@@ -81,10 +95,10 @@ export class StructOptImpl<T> {
       (o) => !o.short && !o.long && (o.repeated || !Object.keys(parsed).includes(o.key)),
     )
     if (positionOption) {
-      if(positionOption.repeated) {
+      if(positionOption.repeated && !parsed['_']) {
         return this.parse(xs, {
           ...parsed,
-          [positionOption.key]: [...(parsed[positionOption.key] ?? []), x],
+          [positionOption.key]: arrayAppend(parsed[positionOption.key], x),
         })
       } else {
         return this.parse(xs, {
@@ -92,6 +106,12 @@ export class StructOptImpl<T> {
           [positionOption.key]: x,
         })
       }
+    }
+    if(this.allowTrailing) {
+      return this.parse(xs, {
+        ...parsed,
+        '_': arrayAppend(parsed['_'], x),
+      })
     }
     return this.parse(xs, parsed)
   }
@@ -134,3 +154,5 @@ function validateOptionConfig(options: IOption[]) {
     }
   }
 }
+
+const arrayAppend = (existing: string[] | undefined, x: string) => [...(existing ?? []), x]
