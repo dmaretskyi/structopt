@@ -29,7 +29,7 @@ var StructOptImpl = /** @class */ (function () {
         this.allowTrailing = allowTrailing !== null && allowTrailing !== void 0 ? allowTrailing : false;
     }
     StructOptImpl.prototype.allPositionalsFilled = function (parsed) {
-        return this.options.every(function (o) { return !o.short && !o.long && (o.repeated && !o.required || !Object.keys(parsed).includes(o.key)); });
+        return this.options.every(function (o) { return o.short || !o.long || o.repeated && !o.required || !Object.keys(parsed).includes(o.key); });
     };
     StructOptImpl.prototype.addOption = function (option) {
         this.options.push(option);
