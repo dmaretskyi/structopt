@@ -20,7 +20,7 @@ export class StructOptImpl<T> {
 
   allPositionalsFilled(parsed: Record<string, any>) {
     return this.options.every(
-      (o) => !o.short && !o.long && (o.repeated && !o.required || !Object.keys(parsed).includes(o.key)),
+      (o) => o.short ||!o.long || o.repeated && !o.required || !Object.keys(parsed).includes(o.key),
     )
   }
 
