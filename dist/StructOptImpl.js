@@ -20,25 +20,28 @@ exports.StructOptImpl = void 0;
 var errors_1 = require("./errors");
 var StructOptImpl = /** @class */ (function () {
     function StructOptImpl(_a) {
-        var key = _a.key, name = _a.name, about = _a.about, version = _a.version;
+        var key = _a.key, name = _a.name, about = _a.about, version = _a.version, allowTrailing = _a.allowTrailing;
         this.options = [];
         this.key = key;
         this.name = name || key;
         this.about = about || '';
         this.version = version || '';
+        this.allowTrailing = allowTrailing !== null && allowTrailing !== void 0 ? allowTrailing : false;
     }
+    StructOptImpl.prototype.allPositionalsFilled = function (parsed) {
+        return this.options.every(function (o) { return !o.short && !o.long && (o.repeated && !o.required || !Object.keys(parsed).includes(o.key)); });
+    };
     StructOptImpl.prototype.addOption = function (option) {
         this.options.push(option);
     };
     StructOptImpl.prototype.parse = function (_a, parsed) {
         var _b, _c, _d, _e, _f, _g;
-        var _h;
         var x = _a[0], xs = _a.slice(1);
         if (parsed === void 0) { parsed = {}; }
         validateOptionConfig(this.options);
         if (x === undefined) {
-            for (var _i = 0, _j = this.options; _i < _j.length; _i++) {
-                var option = _j[_i];
+            for (var _i = 0, _h = this.options; _i < _h.length; _i++) {
+                var option = _h[_i];
                 if (parsed[option.key] === undefined) {
                     if (option.defaultValue !== undefined) {
                         ;
@@ -64,6 +67,9 @@ var StructOptImpl = /** @class */ (function () {
                 }
             });
             if (!option) {
+                if (this.allowTrailing && this.allPositionalsFilled(parsed)) {
+                    return this.parse(xs, __assign(__assign({}, parsed), { '_': arrayAppend(parsed['_'], x) }));
+                }
                 throw new errors_1.UnexpectedArgsError("Found argument '" + x + "' which wasn't expected, or isn't valid in this context");
             }
             var value = xs[0], rest = xs.slice(1);
@@ -82,12 +88,15 @@ var StructOptImpl = /** @class */ (function () {
         }
         var positionOption = this.options.filter(function (o) { return !o.short && !o.long && (o.repeated || !Object.keys(parsed).includes(o.key)); })[0];
         if (positionOption) {
-            if (positionOption.repeated) {
-                return this.parse(xs, __assign(__assign({}, parsed), (_f = {}, _f[positionOption.key] = __spreadArray(__spreadArray([], ((_h = parsed[positionOption.key]) !== null && _h !== void 0 ? _h : [])), [x]), _f)));
+            if (positionOption.repeated && !parsed['_']) {
+                return this.parse(xs, __assign(__assign({}, parsed), (_f = {}, _f[positionOption.key] = arrayAppend(parsed[positionOption.key], x), _f)));
             }
             else {
                 return this.parse(xs, __assign(__assign({}, parsed), (_g = {}, _g[positionOption.key] = x, _g)));
             }
+        }
+        if (this.allowTrailing) {
+            return this.parse(xs, __assign(__assign({}, parsed), { '_': arrayAppend(parsed['_'], x) }));
         }
         return this.parse(xs, parsed);
     };
@@ -131,4 +140,5 @@ function validateOptionConfig(options) {
         }
     }
 }
+var arrayAppend = function (existing, x) { return __spreadArray(__spreadArray([], (existing !== null && existing !== void 0 ? existing : [])), [x]); };
 //# sourceMappingURL=StructOptImpl.js.map

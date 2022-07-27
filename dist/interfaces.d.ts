@@ -3,6 +3,7 @@ export interface IStructOpt {
     name?: string;
     about?: string;
     version?: string;
+    allowTrailing?: boolean;
 }
 export interface IOption<T = any> {
     defaultValue?: string;
@@ -18,5 +19,7 @@ export interface IOption<T = any> {
     repeated: boolean;
 }
 export declare type PrimitiveType = 'boolean' | 'string' | 'number';
-export declare type Instance<T> = T extends new () => infer C ? C : never;
+export declare type Instance<T> = (T extends new () => infer C ? C : never) & {
+    '_': string[];
+};
 //# sourceMappingURL=interfaces.d.ts.map
