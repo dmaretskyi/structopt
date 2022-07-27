@@ -3,6 +3,7 @@ export interface IStructOpt {
   name?: string
   about?: string
   version?: string
+  allowTrailing?: boolean
 }
 
 export interface IOption<T = any> {
@@ -21,4 +22,6 @@ export interface IOption<T = any> {
 
 export type PrimitiveType = 'boolean' | 'string' | 'number'
 
-export type Instance<T> = T extends new () => infer C ? C : never
+export type Instance<T> = (T extends new () => infer C ? C : never) & {
+  '_': string[]
+}

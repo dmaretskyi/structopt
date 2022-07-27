@@ -26,6 +26,7 @@ test('GrepArgs - short', (t) => {
     extendedRegexp: true,
     label: 'myLabel',
     patterns: '/test/',
+    '_': [],
   })
 
   // @ts-expect-error
